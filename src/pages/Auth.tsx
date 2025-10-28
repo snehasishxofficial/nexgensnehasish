@@ -58,7 +58,7 @@ const Auth = () => {
       if (validated.username.toLowerCase() === "teacher" && password === "3956Kolk@t.") {
         const adminEmail = "teacher@tuition.local";
         
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email: adminEmail,
           password: "3956Kolk@t.",
         });
@@ -75,13 +75,18 @@ const Auth = () => {
           });
 
           if (signUpError) throw signUpError;
+          signInData = signUpData;
+        }
 
-          if (signUpData.user) {
-            await supabase.from("user_roles").insert({
-              user_id: signUpData.user.id,
-              role: "admin",
-            });
-          }
+        // Ensure admin role is assigned
+        if (signInData?.user) {
+          const { data: { session } } = await supabase.auth.getSession();
+          await supabase.functions.invoke('assign-admin-role', {
+            body: { userId: signInData.user.id },
+            headers: {
+              Authorization: `Bearer ${session?.access_token}`
+            }
+          });
         }
         
         toast.success("Welcome, Teacher!");

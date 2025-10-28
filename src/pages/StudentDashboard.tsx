@@ -76,26 +76,76 @@ const StudentDashboard = () => {
     }
   };
 
+  const handleMarkPaidCurrentMonth = async () => {
+    if (!student?.id) return;
+    
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    try {
+      const { error } = await supabase
+        .from("fee_records")
+        .insert({
+          student_id: student.id,
+          month: currentMonth,
+          year: currentYear,
+          amount: student.monthly_fees,
+          paid: true,
+          paid_date: new Date().toISOString()
+        });
+
+      if (error) {
+        if (error.code === '23505') { // unique violation
+          toast.error("You have already marked this month as paid!");
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      toast.success("Fee marked as paid for this month!");
+      fetchFeeRecords(student.id);
+    } catch (error) {
+      console.error("Error marking fee paid:", error);
+      toast.error("Failed to mark fee as paid");
+    }
+  };
+
   const handleLeaveTuition = async () => {
-    if (!window.confirm("Are you sure you want to leave the tuition? This will delete your account.")) {
+    if (!window.confirm("Are you sure you want to leave the tuition? This will permanently delete your account and you'll need to register again to rejoin.")) {
       return;
     }
 
     try {
-      const { error: deleteError } = await supabase
-        .from("students")
-        .update({ is_active: false, left_date: new Date().toISOString() })
-        .eq("id", student.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const { error } = await supabase.functions.invoke('delete-account', {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
 
-      if (deleteError) throw deleteError;
+      if (error) throw error;
 
       await supabase.auth.signOut();
       navigate("/");
-      toast.success("Account deactivated successfully");
+      toast.success("Account deleted successfully");
     } catch (error) {
-      console.error("Error leaving tuition:", error);
-      toast.error("Failed to deactivate account");
+      console.error("Error deleting account:", error);
+      toast.error("Failed to delete account");
     }
+  };
+
+  // Check if current month is already paid
+  const isCurrentMonthPaid = () => {
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    
+    return feeRecords.some(
+      record => record.month === currentMonth && record.year === currentYear && record.paid
+    );
   };
 
   const handleLogout = async () => {
@@ -117,6 +167,14 @@ const StudentDashboard = () => {
             <p className="text-muted-foreground">Student Dashboard</p>
           </div>
           <div className="flex gap-2">
+            <Button 
+              onClick={handleMarkPaidCurrentMonth} 
+              variant="default"
+              disabled={isCurrentMonthPaid()}
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              {isCurrentMonthPaid() ? "Paid This Month" : "Mark Fees Paid"}
+            </Button>
             <Button onClick={handleLeaveTuition} variant="destructive">
               <UserMinus className="h-4 w-4 mr-2" />
               Leave Tuition
