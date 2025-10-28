@@ -59,26 +59,7 @@ const StudentDashboard = () => {
     }
   };
 
-  const handleMarkPaid = async (recordId: string) => {
-    try {
-      const { error } = await supabase
-        .from("fee_records")
-        .update({ paid: true, paid_date: new Date().toISOString() })
-        .eq("id", recordId);
-
-      if (error) throw error;
-
-      toast.success("Fee marked as paid!");
-      fetchFeeRecords(student.id);
-    } catch (error) {
-      console.error("Error updating fee:", error);
-      toast.error("Failed to update fee status");
-    }
-  };
-
-  const handleMarkPaidCurrentMonth = async () => {
-    if (!student?.id) return;
-    
+  const handleMarkPaidThisMonth = async () => {
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
@@ -95,34 +76,35 @@ const StudentDashboard = () => {
           paid_date: new Date().toISOString()
         });
 
-      if (error) {
-        if (error.code === '23505') { // unique violation
-          toast.error("You have already marked this month as paid!");
-        } else {
-          throw error;
-        }
-        return;
-      }
+      if (error) throw error;
 
       toast.success("Fee marked as paid for this month!");
       fetchFeeRecords(student.id);
-    } catch (error) {
-      console.error("Error marking fee paid:", error);
-      toast.error("Failed to mark fee as paid");
+    } catch (error: any) {
+      console.error("Error marking fee as paid:", error);
+      if (error.code === '23505') {
+        toast.error("You have already marked this month as paid!");
+      } else {
+        toast.error("Failed to mark fee as paid");
+      }
     }
   };
 
   const handleLeaveTuition = async () => {
-    if (!window.confirm("Are you sure you want to leave the tuition? This will permanently delete your account and you'll need to register again to rejoin.")) {
+    if (!window.confirm("Are you sure you want to leave the tuition? This will permanently delete your account and you cannot login again.")) {
       return;
     }
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
+      }
+
       const { error } = await supabase.functions.invoke('delete-account', {
         headers: {
-          Authorization: `Bearer ${session?.access_token}`
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
@@ -132,20 +114,9 @@ const StudentDashboard = () => {
       navigate("/");
       toast.success("Account deleted successfully");
     } catch (error) {
-      console.error("Error deleting account:", error);
+      console.error("Error leaving tuition:", error);
       toast.error("Failed to delete account");
     }
-  };
-
-  // Check if current month is already paid
-  const isCurrentMonthPaid = () => {
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
-    
-    return feeRecords.some(
-      record => record.month === currentMonth && record.year === currentYear && record.paid
-    );
   };
 
   const handleLogout = async () => {
@@ -158,6 +129,14 @@ const StudentDashboard = () => {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
+  // Check if current month is paid
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+  const isCurrentMonthPaid = feeRecords.some(
+    record => record.month === currentMonth && record.year === currentYear && record.paid
+  );
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="container mx-auto max-w-6xl">
@@ -168,12 +147,12 @@ const StudentDashboard = () => {
           </div>
           <div className="flex gap-2">
             <Button 
-              onClick={handleMarkPaidCurrentMonth} 
+              onClick={handleMarkPaidThisMonth} 
               variant="default"
-              disabled={isCurrentMonthPaid()}
+              disabled={isCurrentMonthPaid}
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              {isCurrentMonthPaid() ? "Paid This Month" : "Mark Fees Paid"}
+              {isCurrentMonthPaid ? "Paid This Month" : "Mark Fees Paid"}
             </Button>
             <Button onClick={handleLeaveTuition} variant="destructive">
               <UserMinus className="h-4 w-4 mr-2" />
@@ -232,17 +211,9 @@ const StudentDashboard = () => {
                     </p>
                     <p className="text-sm text-muted-foreground">₹{record.amount}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant={record.paid ? "default" : "secondary"}>
-                      {record.paid ? "Paid" : "Pending"}
-                    </Badge>
-                    {!record.paid && (
-                      <Button size="sm" onClick={() => handleMarkPaid(record.id)}>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Mark Paid
-                      </Button>
-                    )}
-                  </div>
+                  <Badge variant={record.paid ? "default" : "secondary"}>
+                    {record.paid ? "Paid" : "Pending"}
+                  </Badge>
                 </div>
               ))}
             </div>

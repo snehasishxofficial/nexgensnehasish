@@ -1,9 +1,9 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.10'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,63 +13,54 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('No authorization header');
     }
 
-    // Get user from auth header
-    const { data: { user }, error: userError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
-
-    if (userError || !user) {
-      console.error('Error getting user:', userError);
-      return new Response(
-        JSON.stringify({ error: 'Invalid authorization' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Verify the user's JWT
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      throw new Error('Unauthorized');
     }
 
     console.log('Deleting account for user:', user.id);
 
-    // Delete student record (this will cascade to fee_records if FK exists)
-    const { error: deleteStudentError } = await supabase
+    // 1. Mark student as inactive
+    const { error: studentError } = await supabase
       .from('students')
-      .delete()
+      .update({ is_active: false, left_date: new Date().toISOString() })
       .eq('user_id', user.id);
 
-    if (deleteStudentError) {
-      console.error('Error deleting student:', deleteStudentError);
-      throw deleteStudentError;
+    if (studentError) {
+      console.error('Error updating student:', studentError);
+      throw studentError;
     }
 
-    // Delete auth user using admin API
-    const { error: deleteUserError } = await supabase.auth.admin.deleteUser(user.id);
+    // 2. Delete the auth user (this will cascade delete related records)
+    const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
 
-    if (deleteUserError) {
-      console.error('Error deleting auth user:', deleteUserError);
-      throw deleteUserError;
+    if (deleteError) {
+      console.error('Error deleting user:', deleteError);
+      throw deleteError;
     }
 
-    console.log('Account deleted successfully for user:', user.id);
+    console.log('Account deleted successfully');
 
     return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: true, message: 'Account deleted successfully' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
-    console.error('Error in delete-account:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('Error in delete-account function:', error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
 });

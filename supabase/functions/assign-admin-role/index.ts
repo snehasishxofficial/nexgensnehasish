@@ -1,9 +1,9 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.10'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,58 +13,49 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { userId } = await req.json();
 
-    if (!userId) {
-      return new Response(
-        JSON.stringify({ error: 'User ID is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     console.log('Assigning admin role to user:', userId);
 
     // Check if role already exists
-    const { data: existingRole } = await supabase
+    const { data: existing } = await supabase
       .from('user_roles')
       .select('id')
       .eq('user_id', userId)
       .eq('role', 'admin')
       .maybeSingle();
 
-    if (existingRole) {
-      console.log('Admin role already exists for user:', userId);
+    if (existing) {
+      console.log('Admin role already exists for user');
       return new Response(
-        JSON.stringify({ success: true, message: 'Admin role already assigned' }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: true, message: 'Role already assigned' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       );
     }
 
     // Insert admin role
-    const { error: insertError } = await supabase
+    const { error } = await supabase
       .from('user_roles')
       .insert({ user_id: userId, role: 'admin' });
 
-    if (insertError) {
-      console.error('Error inserting admin role:', insertError);
-      throw insertError;
+    if (error) {
+      console.error('Error assigning admin role:', error);
+      throw error;
     }
 
-    console.log('Admin role assigned successfully to user:', userId);
+    console.log('Admin role assigned successfully');
 
     return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: true, message: 'Admin role assigned' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
-    console.error('Error in assign-admin-role:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('Error in assign-admin-role function:', error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
 });
