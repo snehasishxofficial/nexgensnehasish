@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { LogOut, CheckCircle } from "lucide-react";
+import { LogOut, CheckCircle, UserMinus } from "lucide-react";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -76,6 +76,28 @@ const StudentDashboard = () => {
     }
   };
 
+  const handleLeaveTuition = async () => {
+    if (!window.confirm("Are you sure you want to leave the tuition? This will delete your account.")) {
+      return;
+    }
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("students")
+        .update({ is_active: false, left_date: new Date().toISOString() })
+        .eq("id", student.id);
+
+      if (deleteError) throw deleteError;
+
+      await supabase.auth.signOut();
+      navigate("/");
+      toast.success("Account deactivated successfully");
+    } catch (error) {
+      console.error("Error leaving tuition:", error);
+      toast.error("Failed to deactivate account");
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -94,10 +116,16 @@ const StudentDashboard = () => {
             <h1 className="text-3xl font-bold">{student?.full_name}</h1>
             <p className="text-muted-foreground">Student Dashboard</p>
           </div>
-          <Button onClick={handleLogout} variant="outline">
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleLeaveTuition} variant="destructive">
+              <UserMinus className="h-4 w-4 mr-2" />
+              Leave Tuition
+            </Button>
+            <Button onClick={handleLogout} variant="outline">
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">

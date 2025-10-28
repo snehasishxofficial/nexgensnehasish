@@ -54,19 +54,17 @@ const Auth = () => {
       const validated = loginSchema.parse({ username, password });
       setLoading(true);
 
-      // For admin login
+      // Simple admin check
       if (validated.username.toLowerCase() === "teacher" && password === "3956Kolk@t.") {
-        // Admin email format
-        const adminEmail = `teacher@tuition.local`;
+        const adminEmail = "teacher@tuition.local";
         
-        // Try to sign in
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email: adminEmail,
           password: "3956Kolk@t.",
         });
 
         if (signInError) {
-          // If sign in fails, try to create admin account
+          // Create admin account if doesn't exist
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email: adminEmail,
             password: "3956Kolk@t.",
@@ -79,34 +77,31 @@ const Auth = () => {
           if (signUpError) throw signUpError;
 
           if (signUpData.user) {
-            // Create admin role
             await supabase.from("user_roles").insert({
               user_id: signUpData.user.id,
               role: "admin",
             });
-
-            toast.success("Admin account created! Logging you in...");
-            navigate("/admin");
           }
-        } else if (signInData.session) {
-          toast.success("Welcome back, Teacher!");
-          navigate("/admin");
         }
-      } else {
-        // For student login (username only, no password)
-        const studentEmail = `${validated.username.toLowerCase()}@student.local`;
         
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: studentEmail,
-          password: "student123", // Default password for all students
-        });
+        toast.success("Welcome, Teacher!");
+        navigate("/admin");
+        return;
+      }
 
-        if (signInError) {
-          toast.error("Account not found. Please register first.");
-        } else if (signInData.session) {
-          toast.success("Welcome back!");
-          navigate("/student");
-        }
+      // Student login
+      const studentEmail = `${validated.username.toLowerCase()}@student.local`;
+      
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: studentEmail,
+        password: "student123",
+      });
+
+      if (signInError) {
+        toast.error("Account not found. Please register first.");
+      } else {
+        toast.success("Welcome back!");
+        navigate("/student");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
