@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { LogOut, CheckCircle, UserMinus } from "lucide-react";
+import { LogOut, UserMinus } from "lucide-react";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -59,39 +59,6 @@ const StudentDashboard = () => {
     }
   };
 
-  const handleMarkPaidThisMonth = async () => {
-    const now = new Date();
-    // Get previous month
-    const previousMonth = now.getMonth() === 0 ? 12 : now.getMonth();
-    const previousYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
-
-    try {
-      const { error } = await supabase
-        .from("fee_records")
-        .insert({
-          student_id: student.id,
-          month: previousMonth,
-          year: previousYear,
-          amount: student.monthly_fees,
-          paid: true,
-          paid_date: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
-      const monthName = new Date(previousYear, previousMonth - 1).toLocaleString('default', { month: 'long' });
-      toast.success(`Fee marked as paid for ${monthName} ${previousYear}!`);
-      fetchFeeRecords(student.id);
-    } catch (error: any) {
-      console.error("Error marking fee as paid:", error);
-      if (error.code === '23505') {
-        toast.error("You have already marked previous month as paid!");
-      } else {
-        toast.error("Failed to mark fee as paid");
-      }
-    }
-  };
-
   const handleLeaveTuition = async () => {
     if (!window.confirm("Are you sure you want to leave the tuition? This will permanently delete your account and you cannot login again.")) {
       return;
@@ -131,13 +98,7 @@ const StudentDashboard = () => {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  // Check if previous month is paid
-  const now = new Date();
-  const previousMonth = now.getMonth() === 0 ? 12 : now.getMonth();
-  const previousYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
-  const isPreviousMonthPaid = feeRecords.some(
-    record => record.month === previousMonth && record.year === previousYear && record.paid
-  );
+  const paidRecords = feeRecords.filter(record => record.paid);
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -148,14 +109,6 @@ const StudentDashboard = () => {
             <p className="text-muted-foreground">Student Dashboard</p>
           </div>
           <div className="flex gap-2">
-            <Button 
-              onClick={handleMarkPaidThisMonth} 
-              variant="default"
-              disabled={isPreviousMonthPaid}
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              {isPreviousMonthPaid ? "Previous Month Paid" : "Mark Fees Paid"}
-            </Button>
             <Button onClick={handleLeaveTuition} variant="destructive">
               <UserMinus className="h-4 w-4 mr-2" />
               Leave Tuition
@@ -182,55 +135,73 @@ const StudentDashboard = () => {
 
           <Card className="border-border">
             <CardHeader>
-              <CardTitle>Fee Status</CardTitle>
+              <CardTitle>Recent Payments</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {feeRecords.slice(0, 3).map((record) => (
-                  <div key={record.id} className="flex justify-between items-center">
-                    <span>{new Date(2024, record.month - 1).toLocaleString('default', { month: 'long' })} {record.year}</span>
-                    <Badge variant={record.paid ? "default" : "secondary"}>
-                      {record.paid ? "Paid" : "Pending"}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
+              {paidRecords.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No payment records yet</p>
+              ) : (
+                <div className="space-y-3">
+                  {paidRecords.slice(0, 3).map((record) => (
+                    <div key={record.id} className="flex justify-between items-center p-3 bg-background rounded border">
+                      <div>
+                        <p className="font-medium text-sm">
+                          {new Date(record.year, record.month - 1).toLocaleString('default', { month: 'long' })} {record.year}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {record.paid_date && new Date(record.paid_date).toLocaleString('en-IN', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                      <p className="text-lg font-bold text-primary">₹{record.amount}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
         <Card className="border-border">
           <CardHeader>
-            <CardTitle>Fee Records</CardTitle>
+            <CardTitle>Complete Payment History</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {feeRecords.map((record) => (
-                <div key={record.id} className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
-                  <div>
-                    <p className="font-medium">
-                      {new Date(2024, record.month - 1).toLocaleString('default', { month: 'long' })} {record.year}
-                    </p>
-                    <p className="text-sm text-muted-foreground">₹{record.amount}</p>
-                    {record.paid && record.paid_date && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Paid on: {new Date(record.paid_date).toLocaleString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: true
-                        })}
+            {paidRecords.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No payment records yet</p>
+            ) : (
+              <div className="space-y-3">
+                {paidRecords.map((record) => (
+                  <div key={record.id} className="flex items-center justify-between p-4 rounded-lg bg-secondary/50 border">
+                    <div className="flex-1">
+                      <p className="font-semibold text-base">
+                        Fees for {new Date(record.year, record.month - 1).toLocaleString('default', { month: 'long' })} {record.year}
                       </p>
-                    )}
+                      {record.paid_date && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Paid on: {new Date(record.paid_date).toLocaleString('en-IN', {
+                            weekday: 'short',
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-primary">₹{record.amount}</p>
+                      <Badge variant="default" className="mt-1">Paid</Badge>
+                    </div>
                   </div>
-                  <Badge variant={record.paid ? "default" : "secondary"}>
-                    {record.paid ? "Paid" : "Pending"}
-                  </Badge>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
