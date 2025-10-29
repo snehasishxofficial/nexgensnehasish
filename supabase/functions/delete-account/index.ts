@@ -29,13 +29,17 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    console.log('Deleting account for user:', user.id);
+    // Get userId from request body (for admin) or use authenticated user's id (for student)
+    const body = await req.json();
+    const userIdToDelete = body.userId || user.id;
+
+    console.log('Deleting account for user:', userIdToDelete);
 
     // 1. Mark student as inactive
     const { error: studentError } = await supabase
       .from('students')
       .update({ is_active: false, left_date: new Date().toISOString() })
-      .eq('user_id', user.id);
+      .eq('user_id', userIdToDelete);
 
     if (studentError) {
       console.error('Error updating student:', studentError);
@@ -43,7 +47,7 @@ Deno.serve(async (req) => {
     }
 
     // 2. Delete the auth user (this will cascade delete related records)
-    const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
+    const { error: deleteError } = await supabase.auth.admin.deleteUser(userIdToDelete);
 
     if (deleteError) {
       console.error('Error deleting user:', deleteError);

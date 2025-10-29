@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { LogOut, Trash2, Users, DollarSign, Calendar } from "lucide-react";
+import { LogOut, Trash2, Users, DollarSign, Calendar, Edit } from "lucide-react";
 
 interface Student {
   id: string;
@@ -26,6 +29,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
     checkAdminAccess();
@@ -69,26 +74,54 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteStudent = async (studentId: string, userId: string) => {
-    if (!confirm("Are you sure you want to delete this student?")) return;
+  const handleEditStudent = async () => {
+    if (!editingStudent) return;
 
     try {
-      // Delete student record (this will cascade delete fee_records)
-      const { error: studentError } = await supabase
+      const { error } = await supabase
         .from("students")
-        .delete()
-        .eq("id", studentId);
+        .update({
+          full_name: editingStudent.full_name,
+          guardian_number: editingStudent.guardian_number,
+          class_level: editingStudent.class_level,
+          year: editingStudent.year,
+          date_of_birth: editingStudent.date_of_birth,
+          joined_date: editingStudent.joined_date,
+        })
+        .eq("id", editingStudent.id);
 
-      if (studentError) throw studentError;
+      if (error) throw error;
 
-      // Delete user account
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      
-      if (authError) {
-        console.error("Error deleting auth user:", authError);
+      toast.success("Student details updated successfully");
+      setEditDialogOpen(false);
+      fetchStudents();
+    } catch (error) {
+      console.error("Error updating student:", error);
+      toast.error("Failed to update student details");
+    }
+  };
+
+  const handleDeleteStudent = async (studentId: string, userId: string) => {
+    if (!confirm("Are you sure you want to delete this student? This will permanently delete their account and all their data.")) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Not authenticated");
+        return;
       }
 
-      toast.success("Student deleted successfully");
+      // Call the delete-account edge function
+      const { error: deleteError } = await supabase.functions.invoke('delete-account', {
+        body: { userId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (deleteError) throw deleteError;
+
+      toast.success("Student account deleted successfully");
       fetchStudents();
     } catch (error) {
       console.error("Error deleting student:", error);
@@ -200,13 +233,89 @@ const AdminDashboard = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteStudent(student.id, student.user_id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <div className="flex gap-1 justify-end">
+                            <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setEditingStudent(student)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>Edit Student Details</DialogTitle>
+                                </DialogHeader>
+                                {editingStudent && (
+                                  <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-name">Full Name</Label>
+                                      <Input
+                                        id="edit-name"
+                                        value={editingStudent.full_name}
+                                        onChange={(e) => setEditingStudent({...editingStudent, full_name: e.target.value})}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-dob">Date of Birth</Label>
+                                      <Input
+                                        id="edit-dob"
+                                        type="date"
+                                        value={editingStudent.date_of_birth}
+                                        onChange={(e) => setEditingStudent({...editingStudent, date_of_birth: e.target.value})}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-guardian">Guardian Phone</Label>
+                                      <Input
+                                        id="edit-guardian"
+                                        value={editingStudent.guardian_number}
+                                        onChange={(e) => setEditingStudent({...editingStudent, guardian_number: e.target.value})}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-class">Class</Label>
+                                      <Input
+                                        id="edit-class"
+                                        value={editingStudent.class_level}
+                                        onChange={(e) => setEditingStudent({...editingStudent, class_level: e.target.value})}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-year">Year</Label>
+                                      <Input
+                                        id="edit-year"
+                                        type="number"
+                                        value={editingStudent.year}
+                                        onChange={(e) => setEditingStudent({...editingStudent, year: parseInt(e.target.value)})}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-joined">Joining Date</Label>
+                                      <Input
+                                        id="edit-joined"
+                                        type="date"
+                                        value={editingStudent.joined_date.split('T')[0]}
+                                        onChange={(e) => setEditingStudent({...editingStudent, joined_date: e.target.value})}
+                                      />
+                                    </div>
+                                    <Button onClick={handleEditStudent} className="w-full">
+                                      Save Changes
+                                    </Button>
+                                  </div>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteStudent(student.id, student.user_id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

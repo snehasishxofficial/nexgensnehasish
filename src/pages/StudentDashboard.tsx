@@ -61,16 +61,17 @@ const StudentDashboard = () => {
 
   const handleMarkPaidThisMonth = async () => {
     const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
+    // Get previous month
+    const previousMonth = now.getMonth() === 0 ? 12 : now.getMonth();
+    const previousYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
 
     try {
       const { error } = await supabase
         .from("fee_records")
         .insert({
           student_id: student.id,
-          month: currentMonth,
-          year: currentYear,
+          month: previousMonth,
+          year: previousYear,
           amount: student.monthly_fees,
           paid: true,
           paid_date: new Date().toISOString()
@@ -78,12 +79,13 @@ const StudentDashboard = () => {
 
       if (error) throw error;
 
-      toast.success("Fee marked as paid for this month!");
+      const monthName = new Date(previousYear, previousMonth - 1).toLocaleString('default', { month: 'long' });
+      toast.success(`Fee marked as paid for ${monthName} ${previousYear}!`);
       fetchFeeRecords(student.id);
     } catch (error: any) {
       console.error("Error marking fee as paid:", error);
       if (error.code === '23505') {
-        toast.error("You have already marked this month as paid!");
+        toast.error("You have already marked previous month as paid!");
       } else {
         toast.error("Failed to mark fee as paid");
       }
@@ -129,12 +131,12 @@ const StudentDashboard = () => {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
-  // Check if current month is paid
+  // Check if previous month is paid
   const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
-  const isCurrentMonthPaid = feeRecords.some(
-    record => record.month === currentMonth && record.year === currentYear && record.paid
+  const previousMonth = now.getMonth() === 0 ? 12 : now.getMonth();
+  const previousYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+  const isPreviousMonthPaid = feeRecords.some(
+    record => record.month === previousMonth && record.year === previousYear && record.paid
   );
 
   return (
@@ -149,10 +151,10 @@ const StudentDashboard = () => {
             <Button 
               onClick={handleMarkPaidThisMonth} 
               variant="default"
-              disabled={isCurrentMonthPaid}
+              disabled={isPreviousMonthPaid}
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              {isCurrentMonthPaid ? "Paid This Month" : "Mark Fees Paid"}
+              {isPreviousMonthPaid ? "Previous Month Paid" : "Mark Fees Paid"}
             </Button>
             <Button onClick={handleLeaveTuition} variant="destructive">
               <UserMinus className="h-4 w-4 mr-2" />
@@ -210,6 +212,18 @@ const StudentDashboard = () => {
                       {new Date(2024, record.month - 1).toLocaleString('default', { month: 'long' })} {record.year}
                     </p>
                     <p className="text-sm text-muted-foreground">₹{record.amount}</p>
+                    {record.paid && record.paid_date && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Paid on: {new Date(record.paid_date).toLocaleString('en-IN', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
+                      </p>
+                    )}
                   </div>
                   <Badge variant={record.paid ? "default" : "secondary"}>
                     {record.paid ? "Paid" : "Pending"}
