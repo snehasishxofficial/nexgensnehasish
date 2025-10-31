@@ -83,32 +83,6 @@ const Register = () => {
 
         if (studentError) throw studentError;
 
-        // Create initial fee records for the current year (12 months)
-        const currentYear = new Date().getFullYear();
-        const feeRecords = Array.from({ length: 12 }, (_, i) => ({
-          student_id: authData.user.id, // Will be updated with actual student id
-          month: i + 1,
-          year: currentYear,
-          amount: parseFloat(validated.monthlyFees),
-          paid: false,
-        }));
-
-        // Get the student id
-        const { data: studentData } = await supabase
-          .from("students")
-          .select("id")
-          .eq("user_id", authData.user.id)
-          .single();
-
-        if (studentData) {
-          const recordsWithStudentId = feeRecords.map(record => ({
-            ...record,
-            student_id: studentData.id,
-          }));
-
-          await supabase.from("fee_records").insert(recordsWithStudentId);
-        }
-
         toast.success(`Registration successful! Your username is: ${username}`);
         toast.info("You can now login with your username (no password needed)");
         navigate("/auth");

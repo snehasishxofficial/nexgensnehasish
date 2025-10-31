@@ -121,68 +121,104 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative overflow-hidden">
       <Navigation />
       
-      <div className="pt-24 pb-16 px-4 flex items-center justify-center">
-        <Card className="w-full max-w-md border-border">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
-            <CardDescription className="text-center">
-              Enter your credentials to access your account
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="For students: your name (lowercase)"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Admin: "teacher" | Students: your name in lowercase
-                </p>
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+      
+      <div className="relative pt-24 pb-16 px-4 flex items-center justify-center min-h-screen">
+        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom duration-700">
+          {/* Floating Glow Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 blur-3xl -z-10 rounded-full" />
+          
+          <Card className="border-border/50 shadow-[0_0_50px_rgba(147,51,234,0.1)] backdrop-blur-sm bg-card/95">
+            <CardHeader className="space-y-3 text-center pb-6">
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow mb-2">
+                <svg className="w-8 h-8 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
               </div>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
+                Welcome Back
+              </CardTitle>
+              <CardDescription className="text-base">
+                Sign in to access your dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="text-sm font-medium">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    className="h-11 bg-background/50 border-border/50 focus:border-primary transition-all"
+                  />
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/60" />
+                    Admin: "teacher" | Students: lowercase name
+                  </p>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password (Admin Only)</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Leave empty for students"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Admin only - students leave empty"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-11 bg-background/50 border-border/50 focus:border-primary transition-all"
+                  />
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent/60" />
+                    Students don't need a password
+                  </p>
+                </div>
 
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={loading}
-              >
-                {loading ? "Logging in..." : "Login"}
-              </Button>
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all hover:shadow-glow text-base font-medium"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                      Signing in...
+                    </span>
+                  ) : "Sign In"}
+                </Button>
 
-              <div className="text-center pt-4">
-                <p className="text-sm text-muted-foreground">
-                  New student?{" "}
-                  <button
-                    type="button"
-                    onClick={() => navigate("/register")}
-                    className="text-primary hover:underline font-medium"
-                  >
-                    Register here
-                  </button>
-                </p>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                <div className="relative py-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border/50" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-card px-3 text-muted-foreground">New to NexGen?</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/register")}
+                  className="w-full h-11 rounded-md border border-primary/50 hover:bg-primary/10 hover:border-primary transition-all text-sm font-medium flex items-center justify-center gap-2 group"
+                >
+                  Create Student Account
+                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

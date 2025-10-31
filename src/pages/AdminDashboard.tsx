@@ -211,51 +211,81 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="container mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Admin Dashboard
-            </h1>
-            <p className="text-muted-foreground mt-1">Manage your tuition students</p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/5 p-4 md:p-8">
+      <div className="container mx-auto max-w-7xl space-y-8">
+        {/* Enhanced Header */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl blur-2xl" />
+          <div className="relative bg-card/80 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-border/50 shadow-[0_0_50px_rgba(147,51,234,0.15)]">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-accent flex items-center justify-center shadow-glow">
+                  <svg className="w-8 h-8 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
+                    Teacher Dashboard
+                  </h1>
+                  <p className="text-muted-foreground mt-1 text-sm">Manage your students and track payments</p>
+                </div>
+              </div>
+              <Button onClick={handleLogout} variant="outline" size="lg" className="border-primary/50 hover:bg-primary/10 hover:border-primary">
+                <LogOut className="h-5 w-5 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
-          <Button onClick={handleLogout} variant="outline">
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-border">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+        {/* Enhanced Stats Cards */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card className="border-border/50 hover:border-primary/50 transition-all hover:shadow-xl group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="pb-3 relative">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
+            <CardContent className="relative">
+              <div className="text-4xl font-bold text-primary">{stats.total}</div>
+              <p className="text-xs text-muted-foreground mt-2">Registered students</p>
             </CardContent>
           </Card>
 
-          <Card className="border-border">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Active Students</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-border/50 hover:border-green-500/50 transition-all hover:shadow-xl group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="pb-3 relative">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Active Students</CardTitle>
+                <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 group-hover:scale-110 transition-all">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.active}</div>
+            <CardContent className="relative">
+              <div className="text-4xl font-bold text-green-500">{stats.active}</div>
+              <p className="text-xs text-muted-foreground mt-2">Currently enrolled</p>
             </CardContent>
           </Card>
 
-          <Card className="border-border">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-border/50 hover:border-accent/50 transition-all hover:shadow-xl group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="pb-3 relative">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Revenue</CardTitle>
+                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 group-hover:scale-110 transition-all">
+                  <DollarSign className="h-5 w-5 text-accent" />
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">₹{stats.totalRevenue.toLocaleString()}</div>
+            <CardContent className="relative">
+              <div className="text-4xl font-bold text-accent">₹{stats.totalRevenue.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-2">Expected per month</p>
             </CardContent>
           </Card>
         </div>

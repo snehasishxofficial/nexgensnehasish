@@ -101,62 +101,150 @@ const StudentDashboard = () => {
   const paidRecords = feeRecords.filter(record => record.paid);
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="container mx-auto max-w-6xl">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">{student?.full_name}</h1>
-            <p className="text-muted-foreground">Student Dashboard</p>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={handleLeaveTuition} variant="destructive">
-              <UserMinus className="h-4 w-4 mr-2" />
-              Leave Tuition
-            </Button>
-            <Button onClick={handleLogout} variant="outline">
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4 md:p-8">
+      <div className="container mx-auto max-w-6xl space-y-8">
+        {/* Enhanced Header */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl blur-xl" />
+          <div className="relative bg-card/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-border/50 shadow-card">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow">
+                  <svg className="w-8 h-8 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                    {student?.full_name}
+                  </h1>
+                  <p className="text-muted-foreground mt-1">Student Dashboard</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleLeaveTuition} variant="destructive" className="hover:shadow-lg">
+                  <UserMinus className="h-4 w-4 mr-2" />
+                  Leave Tuition
+                </Button>
+                <Button onClick={handleLogout} variant="outline" className="border-primary/50 hover:bg-primary/10 hover:border-primary">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
+        {/* Enhanced Cards Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="border-border/50 hover:border-primary/50 transition-all hover:shadow-lg group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="border-b border-border/50 bg-gradient-to-r from-primary/5 to-accent/5 relative">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow">
+                  <svg className="w-5 h-5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <CardTitle className="text-xl">Personal Information</CardTitle>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div><span className="text-muted-foreground">School:</span> {student?.school_name}</div>
-              <div><span className="text-muted-foreground">Class:</span> {student?.class_level}</div>
-              <div><span className="text-muted-foreground">Guardian Phone:</span> {student?.guardian_number}</div>
-              <div><span className="text-muted-foreground">Monthly Fees:</span> ₹{student?.monthly_fees}</div>
+            <CardContent className="space-y-4 pt-6 relative">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <span className="text-xs text-muted-foreground">School</span>
+                  <p className="font-medium text-sm mt-0.5">{student?.school_name}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <span className="text-xs text-muted-foreground">Class</span>
+                  <p className="font-medium text-sm mt-0.5">{student?.class_level}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <span className="text-xs text-muted-foreground">Guardian Phone</span>
+                  <p className="font-medium text-sm mt-0.5">{student?.guardian_number}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <span className="text-xs text-muted-foreground">Monthly Fees</span>
+                  <p className="font-bold text-xl text-primary mt-0.5">₹{student?.monthly_fees}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle>Recent Payments</CardTitle>
+          <Card className="border-border/50 hover:border-green-500/50 transition-all hover:shadow-lg group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardHeader className="border-b border-border/50 bg-gradient-to-r from-green-500/5 to-emerald-500/5 relative">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-glow">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <CardTitle className="text-xl">Recent Payments</CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6 relative">
               {paidRecords.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No payment records yet</p>
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-8 h-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                  </div>
+                  <p className="text-sm text-muted-foreground">No payment records yet</p>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {paidRecords.slice(0, 3).map((record) => (
-                    <div key={record.id} className="flex justify-between items-center p-3 bg-background rounded border">
-                      <div>
-                        <p className="font-medium text-sm">
-                          {new Date(record.year, record.month - 1).toLocaleString('default', { month: 'long' })} {record.year}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {record.paid_date && new Date(record.paid_date).toLocaleString('en-IN', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </p>
+                    <div key={record.id} className="group/item hover:scale-[1.02] transition-transform">
+                      <div className="flex justify-between items-center p-4 bg-green-500/5 hover:bg-green-500/10 rounded-xl border border-green-500/20 hover:border-green-500/40 transition-all">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm">
+                              {new Date(record.year, record.month - 1).toLocaleString('default', { month: 'long' })} {record.year}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {record.paid_date && new Date(record.paid_date).toLocaleString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-xl font-bold text-green-600 dark:text-green-400">₹{record.amount}</p>
                       </div>
-                      <p className="text-lg font-bold text-primary">₹{record.amount}</p>
                     </div>
                   ))}
                 </div>
@@ -165,38 +253,77 @@ const StudentDashboard = () => {
           </Card>
         </div>
 
-        <Card className="border-border">
-          <CardHeader>
-            <CardTitle>Complete Payment History</CardTitle>
+        {/* Complete Payment History with Premium Design */}
+        <Card className="border-border/50 shadow-lg">
+          <CardHeader className="border-b border-border/50 bg-gradient-to-r from-primary/5 to-accent/5">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow">
+                <svg className="w-6 h-6 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+              </div>
+              <div>
+                <CardTitle className="text-2xl">Complete Payment History</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">All your fee transactions</p>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {paidRecords.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No payment records yet</p>
+              <div className="text-center py-16">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                </div>
+                <p className="text-muted-foreground text-lg font-medium">No payment records yet</p>
+                <p className="text-muted-foreground text-sm mt-2">Your payment history will appear here</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {paidRecords.map((record) => (
-                  <div key={record.id} className="flex items-center justify-between p-4 rounded-lg bg-secondary/50 border">
-                    <div className="flex-1">
-                      <p className="font-semibold text-base">
-                        Fees for {new Date(record.year, record.month - 1).toLocaleString('default', { month: 'long' })} {record.year}
-                      </p>
-                      {record.paid_date && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Paid on: {new Date(record.paid_date).toLocaleString('en-IN', {
-                            weekday: 'short',
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true
-                          })}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-primary">₹{record.amount}</p>
-                      <Badge variant="default" className="mt-1">Paid</Badge>
+                  <div key={record.id} className="group relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative flex items-center justify-between p-5 rounded-xl bg-gradient-to-r from-green-500/5 to-transparent border border-green-500/20 hover:border-green-500/40 hover:shadow-md transition-all">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg">
+                          <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-lg">
+                            Fees for {new Date(record.year, record.month - 1).toLocaleString('default', { month: 'long' })} {record.year}
+                          </p>
+                          {record.paid_date && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <p className="text-sm text-muted-foreground">
+                                Paid on: {new Date(record.paid_date).toLocaleString('en-IN', {
+                                  weekday: 'short',
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  hour12: true
+                                })}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right ml-4">
+                        <p className="text-3xl font-bold text-green-600 dark:text-green-400">₹{record.amount}</p>
+                        <Badge className="mt-2 bg-green-500/20 text-green-700 dark:text-green-300 hover:bg-green-500/30 border-green-500/50">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          Paid
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 ))}
