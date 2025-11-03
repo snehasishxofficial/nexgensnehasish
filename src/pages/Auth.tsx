@@ -124,34 +124,46 @@ const Auth = () => {
     <div className="min-h-screen relative overflow-hidden">
       <Navigation />
       
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+      {/* Enhanced Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10 animate-gradient" />
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-20 right-20 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[150px] animate-pulse delay-1000" />
+      </div>
       
       <div className="relative pt-24 pb-16 px-4 flex items-center justify-center min-h-screen">
-        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom duration-700">
-          {/* Floating Glow Effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 blur-3xl -z-10 rounded-full" />
-          
-          <Card className="border-border/50 shadow-[0_0_50px_rgba(147,51,234,0.1)] backdrop-blur-sm bg-card/95">
-            <CardHeader className="space-y-3 text-center pb-6">
-              <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow mb-2">
-                <svg className="w-8 h-8 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="w-full max-w-lg animate-in fade-in slide-in-from-bottom duration-700">
+          <Card className="glass-effect border-primary/30 shadow-elegant">
+            <CardHeader className="space-y-5 text-center pb-8">
+              <div className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-br from-primary via-primary-glow to-accent flex items-center justify-center shadow-glow mb-2">
+                <svg className="w-10 h-10 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
-                Welcome Back
-              </CardTitle>
-              <CardDescription className="text-base">
-                Sign in to access your dashboard
-              </CardDescription>
+              <div className="space-y-2">
+                <CardTitle className="text-4xl font-black bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent animate-gradient">
+                  Welcome Back
+                </CardTitle>
+                <CardDescription className="text-lg text-muted-foreground">
+                  Sign in to access your personalized dashboard
+                </CardDescription>
+              </div>
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-effect border-primary/30">
+                <div className="w-2 h-2 rounded-full bg-primary-glow animate-pulse" />
+                <span className="text-sm font-semibold text-primary">Secure Login Portal</span>
+              </div>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="username" className="text-sm font-medium">Username</Label>
+            <CardContent className="px-8 pb-8">
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="username" className="text-base font-semibold flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    Username
+                  </Label>
                   <Input
                     id="username"
                     type="text"
@@ -159,59 +171,78 @@ const Auth = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    className="h-11 bg-background/50 border-border/50 focus:border-primary transition-all"
+                    className="h-12 glass-effect border-border/50 focus:border-primary focus:shadow-glow transition-all text-base"
                   />
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/60" />
-                    Admin: "teacher" | Students: lowercase name
-                  </p>
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                    <p className="text-sm text-muted-foreground">
+                      Admin: "teacher" | Students: lowercase name
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="password" className="text-base font-semibold flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                      <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    Password
+                  </Label>
                   <Input
                     id="password"
                     type="password"
                     placeholder="Admin only - students leave empty"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-11 bg-background/50 border-border/50 focus:border-primary transition-all"
+                    className="h-12 glass-effect border-border/50 focus:border-primary focus:shadow-glow transition-all text-base"
                   />
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent/60" />
-                    Students don't need a password
-                  </p>
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-accent/5 border border-accent/20">
+                    <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 flex-shrink-0" />
+                    <p className="text-sm text-muted-foreground">
+                      Students don't need a password
+                    </p>
+                  </div>
                 </div>
 
                 <Button 
                   type="submit" 
-                  className="w-full h-11 bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all hover:shadow-glow text-base font-medium"
+                  variant="gradient"
+                  className="w-full h-14 text-base font-bold group"
                   disabled={loading}
                 >
                   {loading ? (
-                    <span className="flex items-center gap-2">
-                      <span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    <span className="flex items-center gap-3">
+                      <div className="w-5 h-5 border-3 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                       Signing in...
                     </span>
-                  ) : "Sign In"}
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      Sign In
+                      <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  )}
                 </Button>
 
-                <div className="relative py-4">
+                <div className="relative py-6">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-border/50" />
                   </div>
-                  <div className="relative flex justify-center text-xs">
-                    <span className="bg-card px-3 text-muted-foreground">New to NexGen?</span>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-card px-4 text-muted-foreground font-semibold">New to NexGen?</span>
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => navigate("/register")}
-                  className="w-full h-11 rounded-md border border-primary/50 hover:bg-primary/10 hover:border-primary transition-all text-sm font-medium flex items-center justify-center gap-2 group"
+                  className="w-full h-14 rounded-xl border-2 border-primary/50 hover:bg-primary/10 hover:border-primary transition-all text-base font-semibold flex items-center justify-center gap-3 group glass-effect"
                 >
                   Create Student Account
-                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </button>

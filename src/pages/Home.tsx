@@ -1,7 +1,7 @@
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Mail, Instagram, Linkedin } from "lucide-react";
+import { Mail, Instagram, Linkedin, GraduationCap, Users, TrendingUp, Sparkles, ArrowRight } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import profilePhoto from "@/assets/profile-photo.jpg";
 
@@ -10,112 +10,113 @@ const Home = () => {
     <div className="min-h-screen">
       <Navigation />
       
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-32 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/20" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
+      {/* Hero Section with Enhanced Design */}
+      <section className="relative pt-32 pb-40 px-4 overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10 animate-gradient" />
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-[100px] animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/20 rounded-full blur-[120px] animate-pulse delay-1000" />
+        </div>
         
         <div className="container mx-auto relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
             {/* Left Content */}
             <div className="space-y-8 animate-in fade-in slide-in-from-left duration-1000">
-              <div className="inline-block px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-                <span className="text-sm font-medium text-primary-glow">NexGen Education</span>
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-effect border-primary/30">
+                <Sparkles className="h-4 w-4 text-primary-glow" />
+                <span className="text-sm font-semibold bg-gradient-to-r from-primary-glow to-accent bg-clip-text text-transparent">
+                  Premium Education Platform
+                </span>
               </div>
               
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight">
-                <span className="bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
-                  Welcome to
+              <h1 className="text-6xl md:text-7xl lg:text-8xl font-black leading-tight tracking-tight">
+                <span className="bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent animate-gradient">
+                  Transform Your
                 </span>
                 <br />
-                <span className="text-foreground">NexGen</span>
+                <span className="text-foreground">Future Today</span>
               </h1>
               
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
-                Expert tutoring in <span className="text-primary-glow font-semibold">Mathematics, Science, and Computer Science</span> for Classes 8-12. Empowering students to achieve excellence.
+              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-xl">
+                Expert tutoring in <span className="text-primary-glow font-bold">Math, Science & CS</span> for Classes 8-12. 
+                Join 100+ students achieving excellence with personalized guidance.
               </p>
 
-              <div className="flex flex-wrap gap-4 animate-in fade-in slide-in-from-bottom duration-1000 delay-300">
+              <div className="flex flex-wrap gap-5 animate-in fade-in slide-in-from-bottom duration-1000 delay-300">
                 <Link to="/tutoring">
-                  <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all hover:scale-105 shadow-glow">
-                    Explore My Services
+                  <Button size="lg" variant="gradient" className="group">
+                    Explore Services
+                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
                 <Link to="/contact">
-                  <Button size="lg" variant="outline" className="border-primary/50 hover:bg-primary/10 hover:border-primary transition-all">
+                  <Button size="lg" variant="outline">
                     Get In Touch
                   </Button>
                 </Link>
               </div>
 
               {/* Social Media Links */}
-              <div className="flex gap-4 pt-4">
-                <a 
-                  href="mailto:snehasishxofficial@gmail.com" 
-                  className="p-3 rounded-full bg-card border border-border hover:border-primary hover:bg-primary/10 transition-all hover:shadow-glow hover:scale-110"
-                  aria-label="Email"
-                >
-                  <Mail className="h-6 w-6 text-primary" />
-                </a>
-                <a 
-                  href="https://wa.me/917439115647" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="p-3 rounded-full bg-card border border-border hover:border-primary hover:bg-primary/10 transition-all hover:shadow-glow hover:scale-110"
-                  aria-label="WhatsApp"
-                >
-                  <FaWhatsapp className="h-6 w-6 text-primary" />
-                </a>
-                <a 
-                  href="https://www.instagram.com/_snehasish.das_" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="p-3 rounded-full bg-card border border-border hover:border-primary hover:bg-primary/10 transition-all hover:shadow-glow hover:scale-110"
-                  aria-label="Instagram"
-                >
-                  <Instagram className="h-6 w-6 text-primary" />
-                </a>
-                <a 
-                  href="https://www.linkedin.com/in/snehasishxofficial/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="p-3 rounded-full bg-card border border-border hover:border-primary hover:bg-primary/10 transition-all hover:shadow-glow hover:scale-110"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin className="h-6 w-6 text-primary" />
-                </a>
+              <div className="flex gap-4 pt-6">
+                {[
+                  { icon: Mail, href: "mailto:snehasishxofficial@gmail.com", label: "Email" },
+                  { icon: FaWhatsapp, href: "https://wa.me/917439115647", label: "WhatsApp" },
+                  { icon: Instagram, href: "https://www.instagram.com/_snehasish.das_", label: "Instagram" },
+                  { icon: Linkedin, href: "https://www.linkedin.com/in/snehasishxofficial/", label: "LinkedIn" }
+                ].map(({ icon: Icon, href, label }) => (
+                  <a 
+                    key={label}
+                    href={href} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-4 rounded-xl glass-effect border-border/50 hover:border-primary hover:bg-primary/10 transition-all hover:shadow-glow hover:scale-110 group"
+                    aria-label={label}
+                  >
+                    <Icon className="h-6 w-6 text-primary group-hover:text-primary-glow transition-colors" />
+                  </a>
+                ))}
               </div>
             </div>
 
-            {/* Right Content - Profile Photo */}
+            {/* Right Content - Profile Photo with Enhanced Design */}
             <div className="relative animate-in fade-in slide-in-from-right duration-1000 delay-200">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-full blur-3xl opacity-30 animate-pulse" />
-                <div className="relative rounded-2xl overflow-hidden border-4 border-primary/30 shadow-[0_0_50px_rgba(147,51,234,0.3)] hover:shadow-[0_0_80px_rgba(147,51,234,0.5)] transition-all duration-500 hover:scale-105">
+                {/* Glowing Background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-3xl blur-[80px] opacity-40 animate-pulse" />
+                
+                {/* Main Image Container */}
+                <div className="relative rounded-3xl overflow-hidden border-4 border-primary/30 shadow-[0_0_80px_rgba(59,130,246,0.4)] hover:shadow-[0_0_120px_rgba(59,130,246,0.6)] transition-all duration-500 hover:scale-[1.02] group">
                   <img 
                     src={profilePhoto} 
                     alt="Snehasish Das - NexGen Tutor" 
                     className="w-full h-auto object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60" />
+                  
+                  {/* Overlay Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background/90 to-transparent">
+                    <h3 className="text-2xl font-bold text-foreground mb-1">Snehasish Das</h3>
+                    <p className="text-primary-glow font-medium">B.Tech CSE (Cyber Security)</p>
+                  </div>
                 </div>
               </div>
               
-              {/* Floating Stats */}
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
-                <div className="bg-card/90 backdrop-blur-lg rounded-xl border border-border/50 p-4 shadow-card">
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="text-2xl font-bold text-primary">3+</div>
-                      <div className="text-xs text-muted-foreground">Years</div>
+              {/* Floating Stats Cards */}
+              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
+                <div className="glass-effect border-primary/30 rounded-2xl p-6 shadow-elegant">
+                  <div className="grid grid-cols-3 gap-6 text-center">
+                    <div className="group hover:scale-110 transition-transform cursor-pointer">
+                      <div className="text-3xl font-black bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">3+</div>
+                      <div className="text-xs text-muted-foreground font-medium mt-1">Years</div>
                     </div>
-                    <div>
-                      <div className="text-2xl font-bold text-primary">100+</div>
-                      <div className="text-xs text-muted-foreground">Students</div>
+                    <div className="group hover:scale-110 transition-transform cursor-pointer">
+                      <div className="text-3xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">100+</div>
+                      <div className="text-xs text-muted-foreground font-medium mt-1">Students</div>
                     </div>
-                    <div>
-                      <div className="text-2xl font-bold text-primary">5+</div>
-                      <div className="text-xs text-muted-foreground">Subjects</div>
+                    <div className="group hover:scale-110 transition-transform cursor-pointer">
+                      <div className="text-3xl font-black bg-gradient-to-r from-accent to-accent-glow bg-clip-text text-transparent">5+</div>
+                      <div className="text-xs text-muted-foreground font-medium mt-1">Subjects</div>
                     </div>
                   </div>
                 </div>
@@ -125,55 +126,79 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-4">
+      {/* Features Section with Premium Cards */}
+      <section className="py-32 px-4 relative">
         <div className="container mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Why Choose My Tuition?</h2>
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-5xl md:text-6xl font-black">
+              Why Choose <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">NexGen</span>?
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Experience excellence in education with personalized attention and proven results
+            </p>
+          </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="p-6 rounded-lg bg-card border border-border hover:border-primary transition-all hover:shadow-card">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <span className="text-2xl">🎓</span>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                icon: GraduationCap,
+                title: "3+ Years Experience",
+                description: "Proven track record of helping students excel in their academics with consistent results",
+                gradient: "from-primary/20 to-primary-glow/20"
+              },
+              {
+                icon: Users,
+                title: "CBSE, ICSE & ISC",
+                description: "Specialized coaching for all major educational boards with tailored teaching methods",
+                gradient: "from-accent/20 to-accent-glow/20"
+              },
+              {
+                icon: TrendingUp,
+                title: "Tech & Science",
+                description: "From Python programming to advanced Physics and Chemistry - comprehensive coverage",
+                gradient: "from-primary/20 to-accent/20"
+              }
+            ].map((feature, index) => (
+              <div 
+                key={index}
+                className="group relative p-8 rounded-2xl glass-effect border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-elegant hover:-translate-y-2"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                
+                <div className="relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-glow">
+                    <feature.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 group-hover:text-primary-glow transition-colors">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">3+ Years Experience</h3>
-              <p className="text-muted-foreground">
-                Proven track record of helping students excel in their academics
-              </p>
-            </div>
-
-            <div className="p-6 rounded-lg bg-card border border-border hover:border-primary transition-all hover:shadow-card">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <span className="text-2xl">📚</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">CBSE, ICSE & ISC</h3>
-              <p className="text-muted-foreground">
-                Specialized coaching for all major educational boards
-              </p>
-            </div>
-
-            <div className="p-6 rounded-lg bg-card border border-border hover:border-primary transition-all hover:shadow-card">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <span className="text-2xl">💻</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Tech & Science</h3>
-              <p className="text-muted-foreground">
-                From Python programming to advanced Physics and Chemistry
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10">
-        <div className="container mx-auto text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-bold">Ready to Start Learning?</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Join my tuition classes and unlock your full potential. Register today!
+      {/* CTA Section with Premium Design */}
+      <section className="py-32 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20" />
+        <div className="absolute inset-0">
+          <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary/30 rounded-full blur-[120px]" />
+          <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-accent/30 rounded-full blur-[120px]" />
+        </div>
+        
+        <div className="container mx-auto text-center space-y-8 relative z-10">
+          <h2 className="text-5xl md:text-6xl font-black max-w-3xl mx-auto leading-tight">
+            Ready to Start Your <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Success Journey</span>?
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Join my tuition classes and unlock your full potential. Register today and experience the difference!
           </p>
           <Link to="/auth">
-            <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity">
+            <Button size="lg" variant="gradient" className="text-lg group">
               Register Now
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
         </div>
