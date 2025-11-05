@@ -60,21 +60,62 @@ export type Database = {
           created_at: string | null
           full_name: string
           id: string
+          phone_number: string | null
           profile_photo_url: string | null
         }
         Insert: {
           created_at?: string | null
           full_name: string
           id: string
+          phone_number?: string | null
           profile_photo_url?: string | null
         }
         Update: {
           created_at?: string | null
           full_name?: string
           id?: string
+          phone_number?: string | null
           profile_photo_url?: string | null
         }
         Relationships: []
+      }
+      sms_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          phone_number: string
+          sent_at: string | null
+          status: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          phone_number: string
+          sent_at?: string | null
+          status?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          phone_number?: string
+          sent_at?: string | null
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_notifications_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       students: {
         Row: {
@@ -88,6 +129,7 @@ export type Database = {
           joined_date: string | null
           left_date: string | null
           monthly_fees: number
+          phone_number: string | null
           school_name: string
           updated_at: string | null
           user_id: string
@@ -104,6 +146,7 @@ export type Database = {
           joined_date?: string | null
           left_date?: string | null
           monthly_fees: number
+          phone_number?: string | null
           school_name: string
           updated_at?: string | null
           user_id: string
@@ -120,6 +163,7 @@ export type Database = {
           joined_date?: string | null
           left_date?: string | null
           monthly_fees?: number
+          phone_number?: string | null
           school_name?: string
           updated_at?: string | null
           user_id?: string
