@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { ThemeToggle } from "./ThemeToggle";
 
 export const Navigation = () => {
   const location = useLocation();
@@ -35,6 +36,7 @@ export const Navigation = () => {
                 {link.label}
               </Link>
             ))}
+            <ThemeToggle />
             <Link to="/auth">
               <Button variant="default" size="sm">Login</Button>
             </Link>
