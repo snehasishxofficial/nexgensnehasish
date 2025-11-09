@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
+import { Shield } from "lucide-react";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -73,22 +74,26 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5">
+    <div className="min-h-screen gradient-bg">
       <Navigation />
       
-      <div className="pt-24 pb-16 px-4 flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md shadow-xl border-border/50 backdrop-blur-sm bg-card/95">
-          <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Admin Login
+      <div className="flex items-center justify-center min-h-screen px-4 py-24">
+        <Card className="w-full max-w-md glass-effect">
+          <CardHeader className="space-y-3 text-center pb-8">
+            <div className="mx-auto w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center shadow-lg mb-2">
+              <Shield className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <CardTitle className="text-3xl font-bold tracking-tight">
+              Admin Access
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-base">
               Sign in with your admin credentials
             </CardDescription>
           </CardHeader>
+          
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="username" className="text-sm font-medium">
                   Username
                 </Label>
@@ -103,7 +108,7 @@ const AdminLogin = () => {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="password" className="text-sm font-medium">
                   Password
                 </Label>
@@ -120,7 +125,7 @@ const AdminLogin = () => {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 text-base font-semibold"
+                className="w-full h-12 text-base gradient-primary"
                 disabled={loading}
               >
                 {loading ? "Signing In..." : "Sign In"}

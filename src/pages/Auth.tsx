@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { z } from "zod";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { Phone } from "lucide-react";
 
 const phoneSchema = z.object({
   phoneNumber: z.string().trim().min(10, "Valid phone number required"),
@@ -54,7 +55,6 @@ const Auth = () => {
       phoneSchema.parse({ phoneNumber });
       setLoading(true);
 
-      // Check for admin login
       if (phoneNumber.toLowerCase() === "admin" || phoneNumber.toLowerCase() === "teacher") {
         toast.info("For admin login, use phone +919999999999");
         setPhoneNumber("+919999999999");
@@ -117,25 +117,29 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5">
+    <div className="min-h-screen gradient-bg">
       <Navigation />
       
-      <div className="pt-24 pb-16 px-4 flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md shadow-xl border-border/50 backdrop-blur-sm bg-card/95">
-          <CardHeader className="space-y-1 pb-6">
-            <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              {step === "phone" ? "Welcome Back" : "Verify Phone"}
+      <div className="flex items-center justify-center min-h-screen px-4 py-24">
+        <Card className="w-full max-w-md glass-effect">
+          <CardHeader className="space-y-3 text-center pb-8">
+            <div className="mx-auto w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center shadow-lg mb-2">
+              <Phone className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <CardTitle className="text-3xl font-bold tracking-tight">
+              {step === "phone" ? "Welcome" : "Verify"}
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-base">
               {step === "phone" 
-                ? "Enter your phone number to sign in" 
-                : "Enter the 6-digit code sent to your phone"}
+                ? "Enter your phone to continue" 
+                : "Enter the code sent to your phone"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          
+          <CardContent className="space-y-6">
             {step === "phone" && (
               <form onSubmit={handleSendOTP} className="space-y-6">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Label htmlFor="phoneNumber" className="text-sm font-medium">
                     Phone Number
                   </Label>
@@ -149,24 +153,26 @@ const Auth = () => {
                     className="h-12 text-base"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Include country code (e.g., +91 for India)
+                    Include country code (e.g. +91 for India)
                   </p>
                 </div>
 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 text-base font-semibold"
+                  className="w-full h-12 text-base gradient-primary"
                   disabled={loading}
                 >
-                  {loading ? "Sending..." : "Send OTP"}
+                  {loading ? "Sending..." : "Continue"}
                 </Button>
 
-                <div className="relative my-6">
+                <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border/50"></div>
+                    <span className="w-full border-t" />
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-card text-muted-foreground">or</span>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">
+                      New here?
+                    </span>
                   </div>
                 </div>
 
@@ -174,9 +180,9 @@ const Auth = () => {
                   type="button"
                   variant="outline"
                   onClick={() => navigate("/register")}
-                  className="w-full h-12 text-base font-semibold"
+                  className="w-full h-12 text-base"
                 >
-                  Create New Account
+                  Create Account
                 </Button>
               </form>
             )}
@@ -191,41 +197,39 @@ const Auth = () => {
                       onChange={setOtp}
                     >
                       <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
+                        <InputOTPSlot index={0} className="w-12 h-14 text-lg" />
+                        <InputOTPSlot index={1} className="w-12 h-14 text-lg" />
+                        <InputOTPSlot index={2} className="w-12 h-14 text-lg" />
+                        <InputOTPSlot index={3} className="w-12 h-14 text-lg" />
+                        <InputOTPSlot index={4} className="w-12 h-14 text-lg" />
+                        <InputOTPSlot index={5} className="w-12 h-14 text-lg" />
                       </InputOTPGroup>
                     </InputOTP>
                   </div>
                   <p className="text-sm text-center text-muted-foreground">
-                    Sent to {phoneNumber}
+                    Sent to <span className="font-medium text-foreground">{phoneNumber}</span>
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 text-base font-semibold"
-                    disabled={loading || otp.length !== 6}
-                  >
-                    {loading ? "Verifying..." : "Verify & Sign In"}
-                  </Button>
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 text-base gradient-primary"
+                  disabled={loading || otp.length !== 6}
+                >
+                  {loading ? "Verifying..." : "Verify & Continue"}
+                </Button>
 
-                  <Button 
-                    type="button"
-                    variant="ghost"
-                    className="w-full"
-                    onClick={() => {
-                      setStep("phone");
-                      setOtp("");
-                    }}
-                  >
-                    Change phone number
-                  </Button>
-                </div>
+                <Button 
+                  type="button"
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => {
+                    setStep("phone");
+                    setOtp("");
+                  }}
+                >
+                  ← Change phone number
+                </Button>
               </form>
             )}
           </CardContent>
