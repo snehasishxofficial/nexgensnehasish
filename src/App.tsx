@@ -9,6 +9,7 @@ import Tutoring from "./pages/Tutoring";
 import Resume from "./pages/Resume";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
+import AdminLogin from "./pages/AdminLogin";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/resume" element={<Resume />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/student" element={<StudentDashboard />} />

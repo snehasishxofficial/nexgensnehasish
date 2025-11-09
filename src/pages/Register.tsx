@@ -8,6 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { z } from "zod";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+
+const phoneSchema = z.object({
+  phoneNumber: z.string().trim().min(10, "Valid phone number required").max(15),
+});
 
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
@@ -22,6 +27,9 @@ const registerSchema = z.object({
 const Register = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<"phone" | "otp" | "details">("phone");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState({
     fullName: "",
     dateOfBirth: "",
@@ -39,54 +47,113 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      phoneSchema.parse({ phoneNumber });
+      setLoading(true);
+
+      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
+      });
+
+      if (error) throw error;
+
+      toast.success("OTP sent to your phone!");
+      setStep("otp");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        console.error("OTP error:", error);
+        toast.error("Failed to send OTP. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      if (otp.length !== 6) {
+        toast.error("Please enter a valid 6-digit OTP");
+        return;
+      }
+
+      setLoading(true);
+      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: formattedPhone,
+        token: otp,
+        type: 'sms',
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Check if student record exists
+        const { data: existingStudent } = await supabase
+          .from("students")
+          .select("*")
+          .eq("user_id", data.user.id)
+          .single();
+
+        if (existingStudent) {
+          toast.success("Welcome back!");
+          navigate("/student");
+        } else {
+          toast.success("Phone verified! Please complete your profile.");
+          setStep("details");
+        }
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+      toast.error("Invalid OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompleteRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       const validated = registerSchema.parse(formData);
       setLoading(true);
 
-      // Create username from full name (lowercase, no spaces)
-      const username = validated.fullName.toLowerCase().replace(/\s+/g, '');
-      const studentEmail = `${username}@student.local`;
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) throw new Error("User not found");
 
-      // Create auth account for student
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: studentEmail,
-        password: "student123", // Default password
-        options: {
-          data: { full_name: validated.fullName },
-          emailRedirectTo: `${window.location.origin}/`,
-        },
+      // Add student role
+      await supabase.from("user_roles").insert({
+        user_id: user.id,
+        role: "student",
       });
 
-      if (authError) throw authError;
+      // Create student record
+      const { error: studentError } = await supabase.from("students").insert({
+        user_id: user.id,
+        full_name: validated.fullName,
+        phone_number: phoneNumber,
+        date_of_birth: validated.dateOfBirth,
+        guardian_number: validated.guardianNumber,
+        school_name: validated.schoolName,
+        class_level: validated.classLevel,
+        year: parseInt(validated.year),
+        monthly_fees: parseFloat(validated.monthlyFees),
+      });
 
-      if (authData.user) {
-        // Add student role
-        await supabase.from("user_roles").insert({
-          user_id: authData.user.id,
-          role: "student",
-        });
+      if (studentError) throw studentError;
 
-        // Create student record
-        const { error: studentError } = await supabase.from("students").insert({
-          user_id: authData.user.id,
-          full_name: validated.fullName,
-          date_of_birth: validated.dateOfBirth,
-          guardian_number: validated.guardianNumber,
-          school_name: validated.schoolName,
-          class_level: validated.classLevel,
-          year: parseInt(validated.year),
-          monthly_fees: parseFloat(validated.monthlyFees),
-        });
-
-        if (studentError) throw studentError;
-
-        toast.success(`Registration successful! Your username is: ${username}`);
-        toast.info("You can now login with your username (no password needed)");
-        navigate("/auth");
-      }
+      toast.success("Registration completed successfully!");
+      navigate("/student");
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
@@ -100,20 +167,117 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5">
       <Navigation />
       
       <div className="pt-24 pb-16 px-4">
-        <Card className="w-full max-w-2xl mx-auto border-border">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Student Registration</CardTitle>
-            <CardDescription>
-              Fill in your details to register for tuition classes
+        <Card className="w-full max-w-md mx-auto shadow-xl border-border/50 backdrop-blur-sm bg-card/95">
+          <CardHeader className="space-y-1 pb-6">
+            <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              {step === "phone" && "Welcome"}
+              {step === "otp" && "Verify Phone"}
+              {step === "details" && "Complete Profile"}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {step === "phone" && "Enter your phone number to get started"}
+              {step === "otp" && "Enter the 6-digit code sent to your phone"}
+              {step === "details" && "Tell us about yourself"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
+            {step === "phone" && (
+              <form onSubmit={handleSendOTP} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber" className="text-sm font-medium">
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="+1234567890"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                    className="h-12 text-base"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Include country code (e.g., +91 for India)
+                  </p>
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 text-base font-semibold"
+                  disabled={loading}
+                >
+                  {loading ? "Sending..." : "Send OTP"}
+                </Button>
+
+                <div className="text-center pt-2">
+                  <p className="text-sm text-muted-foreground">
+                    Already registered?{" "}
+                    <button
+                      type="button"
+                      onClick={() => navigate("/auth")}
+                      className="text-primary hover:underline font-semibold"
+                    >
+                      Login
+                    </button>
+                  </p>
+                </div>
+              </form>
+            )}
+
+            {step === "otp" && (
+              <form onSubmit={handleVerifyOTP} className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex justify-center">
+                    <InputOTP
+                      maxLength={6}
+                      value={otp}
+                      onChange={setOtp}
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+                  <p className="text-sm text-center text-muted-foreground">
+                    Sent to {phoneNumber}
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base font-semibold"
+                    disabled={loading || otp.length !== 6}
+                  >
+                    {loading ? "Verifying..." : "Verify"}
+                  </Button>
+
+                  <Button 
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => {
+                      setStep("phone");
+                      setOtp("");
+                    }}
+                  >
+                    Change phone number
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {step === "details" && (
+              <form onSubmit={handleCompleteRegistration} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name *</Label>
                   <Input
@@ -139,7 +303,7 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="guardianNumber">Guardian's Phone Number *</Label>
+                  <Label htmlFor="guardianNumber">Guardian's Phone *</Label>
                   <Input
                     id="guardianNumber"
                     name="guardianNumber"
@@ -163,33 +327,35 @@ const Register = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="classLevel">Class *</Label>
-                  <Input
-                    id="classLevel"
-                    name="classLevel"
-                    placeholder="e.g., 10, 12"
-                    value={formData.classLevel}
-                    onChange={handleChange}
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="classLevel">Class *</Label>
+                    <Input
+                      id="classLevel"
+                      name="classLevel"
+                      placeholder="e.g., 10"
+                      value={formData.classLevel}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="year">Year *</Label>
+                    <Input
+                      id="year"
+                      name="year"
+                      type="number"
+                      value={formData.year}
+                      onChange={handleChange}
+                      required
+                      min="2020"
+                      max="2030"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="year">Year *</Label>
-                  <Input
-                    id="year"
-                    name="year"
-                    type="number"
-                    value={formData.year}
-                    onChange={handleChange}
-                    required
-                    min="2020"
-                    max="2030"
-                  />
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="monthlyFees">Monthly Fees (₹) *</Label>
                   <Input
                     id="monthlyFees"
@@ -201,29 +367,16 @@ const Register = () => {
                     required
                   />
                 </div>
-              </div>
 
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={loading}
-              >
-                {loading ? "Registering..." : "Register"}
-              </Button>
-
-              <div className="text-center pt-2">
-                <p className="text-sm text-muted-foreground">
-                  Already registered?{" "}
-                  <button
-                    type="button"
-                    onClick={() => navigate("/auth")}
-                    className="text-primary hover:underline font-medium"
-                  >
-                    Login here
-                  </button>
-                </p>
-              </div>
-            </form>
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 text-base font-semibold"
+                  disabled={loading}
+                >
+                  {loading ? "Completing..." : "Complete Registration"}
+                </Button>
+              </form>
+            )}
           </CardContent>
         </Card>
       </div>

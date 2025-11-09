@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,20 +8,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import { z } from "zod";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
-const loginSchema = z.object({
-  username: z.string().trim().min(1, "Username is required"),
-  password: z.string().optional(),
+const phoneSchema = z.object({
+  phoneNumber: z.string().trim().min(10, "Valid phone number required"),
 });
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
 
   useEffect(() => {
-    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         checkUserRoleAndRedirect(session.user.id);
@@ -47,209 +47,189 @@ const Auth = () => {
     }
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      const validated = loginSchema.parse({ username, password });
+      phoneSchema.parse({ phoneNumber });
       setLoading(true);
 
-      // Simple admin check
-      if (validated.username.toLowerCase() === "teacher" && password === "3956Kolk@t.") {
-        const adminEmail = "teacher@tuition.local";
-        
-        let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: adminEmail,
-          password: "3956Kolk@t.",
-        });
-
-        if (signInError) {
-          // Create admin account if doesn't exist
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: adminEmail,
-            password: "3956Kolk@t.",
-            options: {
-              data: { full_name: "Teacher Admin" },
-              emailRedirectTo: `${window.location.origin}/`,
-            },
-          });
-
-          if (signUpError) throw signUpError;
-          signInData = signUpData;
-        }
-
-        // Ensure admin role is assigned
-        if (signInData?.user) {
-          const { data: { session } } = await supabase.auth.getSession();
-          await supabase.functions.invoke('assign-admin-role', {
-            body: { userId: signInData.user.id },
-            headers: {
-              Authorization: `Bearer ${session?.access_token}`
-            }
-          });
-        }
-        
-        toast.success("Welcome, Teacher!");
-        navigate("/admin");
+      // Check for admin login
+      if (phoneNumber.toLowerCase() === "admin" || phoneNumber.toLowerCase() === "teacher") {
+        toast.info("For admin login, use phone +919999999999");
+        setPhoneNumber("+919999999999");
+        setLoading(false);
         return;
       }
 
-      // Student login
-      const studentEmail = `${validated.username.toLowerCase()}@student.local`;
-      
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: studentEmail,
-        password: "student123",
+      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
       });
 
-      if (signInError) {
-        toast.error("Account not found. Please register first.");
-      } else {
-        toast.success("Welcome back!");
-        navigate("/student");
-      }
+      if (error) throw error;
+
+      toast.success("OTP sent to your phone!");
+      setStep("otp");
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
-        console.error("Login error:", error);
-        toast.error("Login failed. Please try again.");
+        console.error("OTP error:", error);
+        toast.error("Failed to send OTP. Please try again.");
       }
     } finally {
       setLoading(false);
     }
   };
 
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      if (otp.length !== 6) {
+        toast.error("Please enter a valid 6-digit OTP");
+        return;
+      }
+
+      setLoading(true);
+      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: formattedPhone,
+        token: otp,
+        type: 'sms',
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        await checkUserRoleAndRedirect(data.user.id);
+        toast.success("Welcome back!");
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+      toast.error("Invalid OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5">
       <Navigation />
       
-      {/* Enhanced Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10 animate-gradient" />
-      <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-20 right-20 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[150px] animate-pulse delay-1000" />
-      </div>
-      
-      <div className="relative pt-24 pb-16 px-4 flex items-center justify-center min-h-screen">
-        <div className="w-full max-w-lg animate-in fade-in slide-in-from-bottom duration-700">
-          <Card className="glass-effect border-primary/30 shadow-elegant">
-            <CardHeader className="space-y-5 text-center pb-8">
-              <div className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-br from-primary via-primary-glow to-accent flex items-center justify-center shadow-glow mb-2">
-                <svg className="w-10 h-10 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <div className="space-y-2">
-                <CardTitle className="text-4xl font-black bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent animate-gradient">
-                  Welcome Back
-                </CardTitle>
-                <CardDescription className="text-lg text-muted-foreground">
-                  Sign in to access your personalized dashboard
-                </CardDescription>
-              </div>
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-effect border-primary/30">
-                <div className="w-2 h-2 rounded-full bg-primary-glow animate-pulse" />
-                <span className="text-sm font-semibold text-primary">Secure Login Portal</span>
-              </div>
-            </CardHeader>
-            <CardContent className="px-8 pb-8">
-              <form onSubmit={handleLogin} className="space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor="username" className="text-base font-semibold flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    Username
+      <div className="pt-24 pb-16 px-4 flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md shadow-xl border-border/50 backdrop-blur-sm bg-card/95">
+          <CardHeader className="space-y-1 pb-6">
+            <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              {step === "phone" ? "Welcome Back" : "Verify Phone"}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {step === "phone" 
+                ? "Enter your phone number to sign in" 
+                : "Enter the 6-digit code sent to your phone"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {step === "phone" && (
+              <form onSubmit={handleSendOTP} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber" className="text-sm font-medium">
+                    Phone Number
                   </Label>
                   <Input
-                    id="username"
-                    type="text"
-                    placeholder="Enter your username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="+1234567890"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
                     required
-                    className="h-12 glass-effect border-border/50 focus:border-primary focus:shadow-glow transition-all text-base"
+                    className="h-12 text-base"
                   />
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                    <p className="text-sm text-muted-foreground">
-                      Admin: "teacher" | Students: lowercase name
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Label htmlFor="password" className="text-base font-semibold flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Admin only - students leave empty"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 glass-effect border-border/50 focus:border-primary focus:shadow-glow transition-all text-base"
-                  />
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-accent/5 border border-accent/20">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 flex-shrink-0" />
-                    <p className="text-sm text-muted-foreground">
-                      Students don't need a password
-                    </p>
-                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Include country code (e.g., +91 for India)
+                  </p>
                 </div>
 
                 <Button 
                   type="submit" 
-                  variant="gradient"
-                  className="w-full h-14 text-base font-bold group"
+                  className="w-full h-12 text-base font-semibold"
                   disabled={loading}
                 >
-                  {loading ? (
-                    <span className="flex items-center gap-3">
-                      <div className="w-5 h-5 border-3 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                      Signing in...
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      Sign In
-                      <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                    </span>
-                  )}
+                  {loading ? "Sending..." : "Send OTP"}
                 </Button>
 
-                <div className="relative py-6">
+                <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border/50" />
+                    <div className="w-full border-t border-border/50"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="bg-card px-4 text-muted-foreground font-semibold">New to NexGen?</span>
+                    <span className="px-4 bg-card text-muted-foreground">or</span>
                   </div>
                 </div>
 
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => navigate("/register")}
-                  className="w-full h-14 rounded-xl border-2 border-primary/50 hover:bg-primary/10 hover:border-primary transition-all text-base font-semibold flex items-center justify-center gap-3 group glass-effect"
+                  className="w-full h-12 text-base font-semibold"
                 >
-                  Create Student Account
-                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </button>
+                  Create New Account
+                </Button>
               </form>
-            </CardContent>
-          </Card>
-        </div>
+            )}
+
+            {step === "otp" && (
+              <form onSubmit={handleVerifyOTP} className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex justify-center">
+                    <InputOTP
+                      maxLength={6}
+                      value={otp}
+                      onChange={setOtp}
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+                  <p className="text-sm text-center text-muted-foreground">
+                    Sent to {phoneNumber}
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base font-semibold"
+                    disabled={loading || otp.length !== 6}
+                  >
+                    {loading ? "Verifying..." : "Verify & Sign In"}
+                  </Button>
+
+                  <Button 
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => {
+                      setStep("phone");
+                      setOtp("");
+                    }}
+                  >
+                    Change phone number
+                  </Button>
+                </div>
+              </form>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
